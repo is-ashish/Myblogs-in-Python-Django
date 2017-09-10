@@ -1,10 +1,11 @@
 import json
 from django.shortcuts import render ,redirect
+from django.urls import reverse
 from django.contrib.auth import login as auth_login ,authenticate
 from django.contrib.auth.forms import UserCreationForm,User
 from .models import UserKeyword,UserCode,Code
 from django.shortcuts import HttpResponse
-from django.http import Http404
+from django.http import Http404,HttpResponseRedirect
 
 
 def login(request):
@@ -25,9 +26,8 @@ def signup(request):
             form.save()
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
+            user=auth_login(username=username,password=raw_password)
             auth_login(request,user)
-            #login(request , user,)
             return redirect('login')
     else:
         form = UserCreationForm()
@@ -36,9 +36,20 @@ def signup(request):
 
 
 def home(request):
-    allcode=Code.objects.all()
-    context={'allcode':allcode,}
-    return render(request,'blog/home.html',context)
+    user=request.user
+
+    if  user.is_authenticated():
+        print "authenticated"
+        print "_" * 100
+        allcode=Code.objects.all()
+        context={'allcode':allcode,}
+        return render(request,'blog/home.html',context)
+    else:
+        print "un+authenticated"
+        print "_" * 100
+        cv={}
+        return HttpResponseRedirect(reverse('blog:login'))
+
 
 
 def add_keyword(request):

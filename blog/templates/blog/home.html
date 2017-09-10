@@ -88,8 +88,8 @@
 </head>
 <body>
 
-       <h5><a href="{%url 'logout'%}">Logout</a> </h5>
-<form  id="form" method="post" action="{% url 'add_keyword' %}">
+       <h2><a href="{%url 'blog:logout'%}">Logout</a> </h2>
+<form  id="form" method="post" action="{% url 'blog:add_keyword' %}">
     {% csrf_token %}
     <label><h1>Enter String :</h1></label>
 
@@ -98,7 +98,7 @@
 </form> <br/>
 
        <h5>click button Get ID </h5>
-       <form  id="code_form" method="post" action="{% url 'add_code' %}">
+       <form  id="code_form" method="post" action="{% url 'blog:add_code' %}">
     {% csrf_token %}
     <h3>Select Code:</h3>
           <select name="code_id">
@@ -109,7 +109,7 @@
 
         <input type="submit" value="Submit">
     </form> <br/><br/>
-   <form id="profile" method="post" action="{%url 'get_profile' %}" >
+   <form id="profile" method="post" action="{%url 'blog:get_profile' %}" >
        {% csrf_token %}
             <input type="submit" value="Get Profile">
    </form>

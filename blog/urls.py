@@ -12,7 +12,7 @@ urlpatterns =[
       url(r'^add-code/$', add_code, name='add_code'),
       url(r'^get-profile/$',get_profile,name='get_profile'),
       url(r'^admin/', admin.site.urls),
-      url(r'^$',home,name='home'),
+      url(r'^home/$',home,name='home'),
 ]
 
 
