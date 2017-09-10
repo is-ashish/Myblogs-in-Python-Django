@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+    background-color: #3e8e41;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown a:hover {background-color: #f1f1f1}
+
+.show {display:block;}
+</style>
+    <meta charset="UTF-8">
+    <title>User String</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script>
+    $("document").ready(function () {
+        $('#form').submit(function(e)
+                                 {
+                                 var urls= "/add-keyword/";
+                                 $.ajax({
+                                        type:"POST",
+                                        url:urls,
+
+                                        data: $('#form').serialize(),
+                                        success: function(data)
+                                                {
+                                                  alert(data['message']);
+                                                }
+                                        });
+                                 e.preventDefault();
+                                 });
+         });
+
+    </script>
+    <script>
+    $("document").ready(function () {
+        $('#code_form').submit(function(e)
+                                 {
+                                 var urls= "/add-code/";
+                                 $.ajax({
+                                        type:"POST",
+                                        url:urls,
+
+                                        data: $('#code_form').serialize(),
+                                        success: function(data)
+                                                {
+                                                  alert(data['message']);
+                                                }
+                                        });
+                                 e.preventDefault();
+                                 });
+         });
+
+    </script>
+
+</head>
+<body>
+
+       <h5><a href="{%url 'logout'%}">Logout</a> </h5>
+<form  id="form" method="post" action="{% url 'add_keyword' %}">
+    {% csrf_token %}
+    <label><h1>Enter String :</h1></label>
+
+    <input type="text" name="str" required placeholder="write your keyword" ><br/><br/>
+    <input type="submit" value="Submit">
+</form> <br/>
+
+       <h5>click button Get ID </h5>
+       <form  id="code_form" method="post" action="{% url 'add_code' %}">
+    {% csrf_token %}
+    <h3>Select Code:</h3>
+          <select name="code_id">
+                    {% for str in allcode %}
+              <option value="{{str.id}}">{{ str.code }}</option>
+                    {% endfor %}
+          </select>
+
+        <input type="submit" value="Submit">
+    </form> <br/><br/>
+   <form id="profile" method="post" action="{%url 'get_profile' %}" >
+       {% csrf_token %}
+            <input type="submit" value="Get Profile">
+   </form>
+
+
+
+
+
+  </body>
+</html>
+

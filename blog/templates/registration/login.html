@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>login</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+ {% block content %}
+   <div class="container">
+       <h2>Login</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+      <p><a href="{% url 'signup' %}">signup</a></p>
+  </form>
+   </div>
+
+{% endblock %}
+</body>
+</html>

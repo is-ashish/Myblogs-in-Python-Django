@@ -1,0 +1,23 @@
+WORK SHOP--1
+ gcc -c a
+  433* gcc -c a
+  434  vi a.c
+  435  gcc -c a.c
+  436  ls
+  437  objdump -s a.o
+  438  clear
+  439  histry
+  440  history
+  441  vi a1.c
+  442  pwd
+  443  ls
+  444  objdump -s a1.o
+  445  gcc -c a1.c
+  446  objdump -s a1.o
+  447  objdump -s a.o>1
+  448  objdump -s a1.o>1
+  449  objdump -s a.o>0
+  450  diff 0,1
+  451  diff 0 1
+  452  history>cmd
+

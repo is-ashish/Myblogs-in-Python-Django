@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+</head>
+<body>
+
+    <h4>All keywords</h4> <br/>
+            <ul>
+                {% for key in allkey %}
+                  <li>{{key.keyword}}</li>
+                 {% endfor %}
+            </ul> <br/><br/>
+    <h4>All Code </h4>  <br/>
+            <ul>
+                {% for cd in allcode %}
+                  <li>{{cd.code}}</li>
+                {% endfor %}
+            </ul> <br/><br/>
+
+
+
+
+</body>
+</html>
+
+
+
