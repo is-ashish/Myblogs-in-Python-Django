@@ -15,10 +15,3 @@ urlpatterns =[
       url(r'^admin/', admin.site.urls),
 ]
 
-
-# url(r'^(?P<question_id>[0-9]+)/results/$', views.results, name='results'),
-#url(r'^home/$',home,name='home'),
-
-
-
-

@@ -1,7 +1,7 @@
 import json
 from django.shortcuts import render,redirect
 from django.urls import reverse
-from django.contrib.auth import login as auth_login ,authenticate
+from django.contrib.auth import login as auth_login,authenticate
 from .models import UserKeyword,UserCode,Code
 from django.contrib.auth.models import User
 from django.shortcuts import HttpResponse
@@ -13,12 +13,16 @@ def login(request):
     if request.method=='POST':
         email= request.POST.get('email',None)
         password1 = request.POST.get('password1',None)
+        User.objects.get(email=email, password1=password1)
         user = authenticate(username=email, password=password1)
+        print user
         if user is not None:
             if user.is_active:
                 auth_login(request, user)
+
                 return render(request, 'blog/home.html',cv)
         else:
+            print "jnc"
             return render(request, 'blog/login.html', cv)
     else:
         return render(request, 'blog/login.html', cv)
