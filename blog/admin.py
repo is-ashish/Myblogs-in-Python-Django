@@ -8,5 +8,3 @@ admin.site.register(UserKeyword)
 admin.site.register(Code)
 admin.site.register(UserCode)
 
-
-

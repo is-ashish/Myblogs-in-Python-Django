@@ -20,8 +20,11 @@ class Code(models.Model):
         return self.code
 
 
-
 class UserCode(models.Model):
     user=models.ForeignKey(User)
     code=models.ForeignKey(Code)
+
+
+
+
 

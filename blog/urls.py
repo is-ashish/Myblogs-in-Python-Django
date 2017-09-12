@@ -5,16 +5,20 @@ from . views import *
 
 # app_name = 'blog'
 urlpatterns =[
-      url(r'^login/$',views.login,name='login'),
-      url(r'^logout/$' ,views.logout,name='logout'),
+      url(r'^login/$',login,name='login'),
+      url(r'^logout/$' ,logout,name='logout'),
       url(r'^signup/$',signup, name='signup'),
       url(r'^add-keyword/$', add_keyword, name='add_keyword'),
       url(r'^add-code/$', add_code, name='add_code'),
       url(r'^get-profile/$',get_profile,name='get_profile'),
+      url(r'^',home,name='home'),
       url(r'^admin/', admin.site.urls),
-      url(r'^home/$',home,name='home'),
 ]
 
 
 # url(r'^(?P<question_id>[0-9]+)/results/$', views.results, name='results'),
+#url(r'^home/$',home,name='home'),
+
+
+
 
