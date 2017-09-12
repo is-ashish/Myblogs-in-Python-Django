@@ -10,35 +10,20 @@ from django.http import Http404,HttpResponseRedirect
 
 def login(request):
     cv={}
+    user=request.user
     if request.method=='POST':
         email= request.POST.get('email',None)
         password1 = request.POST.get('password1',None)
-        User.objects.get(email=email, password1=password1)
-        user = authenticate(username=email, password=password1)
         print user
         if user is not None:
             if user.is_active:
                 auth_login(request, user)
-
                 return render(request, 'blog/home.html',cv)
         else:
             print "jnc"
             return render(request, 'blog/login.html', cv)
     else:
         return render(request, 'blog/login.html', cv)
-
-
-def logout(request):
-    cp ={}
-    return render(request,'blog/logged_out.html',cp)
-
-
-def get_user(email):
-    try:
-        return User.objects.get(email=email.lower())
-    except User.DoesNotExist:
-        return None
-
 
 
 def signup(request):
@@ -53,8 +38,8 @@ def signup(request):
                     user=User.objects.create_user(username=email)
                     user.set_password('password1')
                     user.save()
-                    # user= authenticate(username=user, password=password1)
-                    # auth_login(request, user)
+                    user= authenticate(username=user, password=password1)
+                    auth_login(request, user)
                     # login
                     return redirect('blog:login')
             else:
@@ -63,6 +48,20 @@ def signup(request):
         else:
             # messages
             return render(request, 'blog/signup.html',cv)
+
+
+
+
+def logout(request):
+    cp ={}
+    return render(request,'blog/logged_out.html',cp)
+
+
+def get_user(email):
+    try:
+        return User.objects.get(email=email.lower())
+    except User.DoesNotExist:
+        return None
 
 
 
