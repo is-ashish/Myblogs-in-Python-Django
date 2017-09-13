@@ -1,60 +1,72 @@
 import json
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.contrib.auth import login as auth_login,authenticate
-from .models import UserKeyword,UserCode,Code
+from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
+from .models import UserKeyword, UserCode, Code
 from django.contrib.auth.models import User
 from django.shortcuts import HttpResponse
-from django.http import Http404,HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
+
+
+def redirect_to_home():
+    return redirect(reverse('blog:home'))
+
+
+def redirect_to_login():
+    return redirect(reverse('blog:login'))
 
 
 def login(request):
-    cv={}
-    user=request.user
-    if request.method=='POST':
-        email= request.POST.get('email',None)
-        password1 = request.POST.get('password1',None)
-        print user
+    user = request.user
+    if user is not None:
+        redirect_to_home()
+    if request.method == 'POST':
+        email = request.POST.get('email', None)
+        password = request.POST.get('password', None)
+        print email, password
+        user = authenticate(username=email, password=password)
         if user is not None:
-            if user.is_active:
-                auth_login(request, user)
-                return render(request, 'blog/home.html',cv)
+            auth_login(request, user)
+            return HttpResponse(json.dumps({"message": "Successfully LoggedIn", "success": True}),
+                                content_type="application/json")
         else:
-            print "jnc"
-            return render(request, 'blog/login.html', cv)
+            return HttpResponse(json.dumps({"message": "Enter valid credentials"}),
+                                content_type="application/json")
     else:
-        return render(request, 'blog/login.html', cv)
+        return render(request, 'blog/login.html', {})
 
 
 def signup(request):
-        cv={}
-        if request.method == "POST":
-            email = request.POST['email']
-            password1 = request.POST['password1']
-            password2 = request.POST['password2']
-            user = get_user(email)
-            if password1 == password2:
-                if user is None:
-                    user=User.objects.create_user(username=email)
-                    user.set_password('password1')
-                    user.save()
-                    user= authenticate(username=user, password=password1)
-                    auth_login(request, user)
-                    # login
-                    return redirect('blog:login')
-            else:
-                # messages
-                return render(request, 'blog/signup.html',cv)
-        else:
-            # messages
-            return render(request, 'blog/signup.html',cv)
+    user = request.user
+    if user is not None:
+        redirect_to_home()
+    if request.method == "POST":
+        email = request.POST['email']
+        password1 = request.POST['password1']
+        password2 = request.POST['password2']
+        user = get_user(email)
+        if user is not None:
+            return HttpResponse(json.dumps({"message": "User already exists for this email ID", "success": False}),
+                                content_type="application/json")
+        if password1 == password2:
+            user = User.objects.create_user(username=email, email=email)
+            user.set_password(password1)
+            user.save()
+            auth_login(request, user)
+            return HttpResponse(json.dumps({"message": "Successfully Registered and Logged In", "success": True}),
+                                content_type="application/json")
 
-
+        return HttpResponse(json.dumps({"message": "Passwords don't match", "success": False}),
+                            content_type="application/json")
+    else:
+        return render(request, 'blog/signup.html', {})
 
 
 def logout(request):
-    cp ={}
-    return render(request,'blog/logged_out.html',cp)
+    user = request.user
+    if user is not None:
+        auth_logout(request)
+    return redirect_to_login()
 
 
 def get_user(email):
@@ -64,10 +76,9 @@ def get_user(email):
         return None
 
 
-
 def add_keyword(request):
-    if request.method=='POST':
-        word=request.POST.get('str',None)
+    if request.method == 'POST':
+        word = request.POST.get('str', None)
         user = request.user
         if not user.is_authenticated():
             return HttpResponse("Not Authenticated")
@@ -81,6 +92,7 @@ def add_keyword(request):
                                 content_type="application/json")
     else:
         raise Http404("Not Found")
+
 
 def add_code(request):
     if request.method == 'POST':
@@ -105,27 +117,22 @@ def add_code(request):
         raise Http404("Not Found")
 
 
-
 def get_profile(request):
-    if request.method=='POST':
-        user=request.user
-        allkey=UserKeyword.objects.filter(user=user)
-        allcode=UserCode.objects.all()
-        context={'allkey':allkey,'allcode':allcode}
-        return render(request,'blog/profile.html',context)
-
+    user = request.user
+    if not user.is_authenticated():
+        return redirect_to_login()
+    user_keywords = UserKeyword.objects.filter(user=user)
+    user_codes = UserCode.objects.all()
+    context = {'allkey': user_keywords, 'allcode': user_codes}
+    return render(request, 'blog/profile.html', context)
 
 
 def home(request):
-    user=request.user
+    user = request.user
     if not user.is_authenticated():
-       # print "if executeed"
-        print "ejvv"
-        cv={}
-        return render(request,'blog/login',cv)
+        return redirect(reverse('login'))
     else:
-        print  "else executeed"
-        allcode = Code.objects.all()
-        context = {'allcode': allcode, }
+        all_codes = Code.objects.all()
+        context = {'allcode': all_codes}
         return render(request, 'blog/home.html', context)
 

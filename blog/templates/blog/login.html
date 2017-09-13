@@ -12,27 +12,54 @@
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
             integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-            crossorigin="anonymous"></script>
+            crossorigin="anonymous">
+
+    </script>
+    <script>
+        $("document").ready(function () {
+            $('#login-form').submit(function (e) {
+                var urls = "/login/";
+                var data = $(this).serialize();
+                $.ajax({
+                    type: "POST",
+                    url: urls,
+                    data: data,
+                    success: function (data) {
+                        if (data["success"]) {
+                            location.href = "/";
+                        }
+                        else {
+                            alert(data['message']);
+                        }
+                    }
+                });
+                e.preventDefault();
+            });
+        });
+
+    </script>
 </head>
 <body>
 
 <div class="container">
     <div class="col-md-4 col-md-offset-4">
-    <form class="form-signin" method="post" action="{% url  'blog:login' %} ">
-        {% csrf_token %}
-        <h2 class="form-signin-heading">Please sign in</h2>
-        <label for="inputEmail" class="sr-only">Email address</label>
-        <input type="email" id="inputEmail" class="form-control" placeholder="Email address"
-               name="email" required autofocus>
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" name="password1" id="inputPassword" class="form-control" placeholder="Password" required><br/>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-        <a href="{% url 'blog:signup' %}" class="btn btn-lg btn-primary btn-block" role="button">Sign Up</a>
-    </form>
+        <form id="login-form" class="form-signin" method="post" action="{% url  'blog:login' %} ">
+            {% csrf_token %}
+            <h2 class="form-signin-heading">Please sign in</h2>
+            <label for="inputEmail" class="sr-only">Email address</label>
+            <input type="email" id="inputEmail" class="form-control" placeholder="Email address"
+                   name="email" required autofocus>
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password"
+                   required><br/>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+            Not a registered User? <a href="{% url 'blog:signup' %}">Sign Up</a>
+        </form>
 
 
+    </div>
 </div>
-</div> <!-- /container -->
+<!-- /container -->
 
 
 <!-- Bootstrap core JavaScript

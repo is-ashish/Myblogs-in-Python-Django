@@ -9,13 +9,14 @@ class Command(BaseCommand):
     #   # parser.add_argument('hello')
 
     def handle(self, *args, **options):
-        scrape()
+        scrape_from_advance_search()
 
 
 
 
 
-def scrape():
+def scrape_from_advance_search():
+    keyword = "award"
     data = '------WebKitFormBoundaryEY5KmOxkY2tN5Bbk \
 Content-Disposition: form-data; name="_____dummy" \
         \
@@ -131,8 +132,10 @@ Content-Disposition: form-data; name="dnf_class_values[procurement_notice][recov
 ------WebKitFormBoundaryEY5KmOxkY2tN5Bbk\
 Content-Disposition: form-data; name="dnf_class_values[procurement_notice][keywords]"\
         \
-award\
-------WebKitFormBoundaryEY5KmOxkY2tN5Bbk\
+'
+    if keyword is not None:
+        data += keyword + "\n"
+    data += '------WebKitFormBoundaryEY5KmOxkY2tN5Bbk\
 Content-Disposition: form-data; name="dnf_class_values[procurement_notice][naics_code][]"\
         \
         \
@@ -221,18 +224,18 @@ Search\
         'Content-Type': u'multipart/form-data; boundary=----WebKitFormBoundaryEY5KmOxkY2tN5Bbk',
 
     }
-    url = "https://www.fbo.gov/index?s=opportunity&mode=list&tab=search"
+    url = "https://www.fbo.gov/index?s=opportunity&mode=list&tab=list&tabmode=list&pp=100"
 
     r = requests.post(url, data=data, headers=headers)
     html_content = r.text
     soup = BeautifulSoup(html_content)
-    rows = soup.findAll("tr", {"class": "lst-rw"})
+    rows = soup.findAll("tr", {"class": "lst-rw lst-rw-even"})
     print "Found entries: ", len(rows)
     for row in rows:
         link = row.find("a", {"class": "lst-lnk-notice"})
         link_href = link['href']
         print link_href
-        link_text = link.find("div", {"class": "solt"})
+        link_text = link.find("div", {"class": "solt"}).text
         print link_text
 
 
@@ -250,4 +253,36 @@ Search\
         # print response
 
 
-scrape()
+
+
+
+
+def scrape_from_normal_search():
+    data = {
+
+    }
+    headers = {"Content-Type": "application/json"}
+
+    # r = requests.get(
+    #     "https://api.cloudflare.com/client/v4/zones/?name=%s" % domain_name, headers=headers)
+    # response = r.json()
+    # headers = {
+    #     'Content-Type': u'multipart/form-data; boundary=----WebKitFormBoundaryEY5KmOxkY2tN5Bbk',
+    # }
+    url = "https://www.fbo.gov/index?s=opportunity&mode=list&tab=search"
+
+    r = requests.post(url, data=data, headers=headers)
+    html_content = r.text
+    soup = BeautifulSoup(html_content)
+    rows = soup.findAll("tr", {"class": "lst-rw"})
+    print "Found entries: ", len(rows)
+    for row in rows:
+        link = row.find("a", {"class": "lst-lnk-notice"})
+        link_href = link['href']
+        print link_href
+        link_text = link.find("div", {"class": "solt"})
+        print link_text
+
+
+
+scrape_from_advance_search()
