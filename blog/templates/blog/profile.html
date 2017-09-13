@@ -6,16 +6,16 @@
 </head>
 <body>
 
-    <h4>All keywords</h4> <br/>
+    <h4>Subscribed keywords</h4> <br/>
             <ul>
-                {% for key in allkey %}
-                  <li>{{key.keyword}}</li>
+                {% for user_keyword in user_keywords %}
+                  <li>{{user_keyword.keyword.name}}</li>
                  {% endfor %}
             </ul> <br/><br/>
-    <h4>All Code </h4>  <br/>
+    <h4>Subscribed Codes </h4>  <br/>
             <ul>
-                {% for cd in allcode %}
-                  <li>{{cd.code}}</li>
+                {% for user_code in user_codes %}
+                  <li>{{user_code.code.code}}</li>
                 {% endfor %}
             </ul> <br/><br/>
 

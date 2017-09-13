@@ -1,7 +1,11 @@
+from time import timezone
 from BeautifulSoup import BeautifulSoup
+import datetime
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 import mechanize
 import requests
+from blog.models import Opportunity, KeywordOpportunity, UserKeyword, Keyword
 
 
 class Command(BaseCommand):
@@ -9,14 +13,14 @@ class Command(BaseCommand):
     #   # parser.add_argument('hello')
 
     def handle(self, *args, **options):
-        scrape_from_advance_search()
+        keywords = Keyword.objects.filter(Q(last_scraped__gte=datetime.datetime.today() - datetime.timedelta(days=1)) |
+                                          Q(last_scraped__isnull=True))
+        for keyword in keywords:
+            scrape_from_advance_search(keyword)
 
 
-
-
-
-def scrape_from_advance_search():
-    keyword = "award"
+def scrape_from_advance_search(keyword):
+    keyword_name = keyword.name
     data = '------WebKitFormBoundaryEY5KmOxkY2tN5Bbk \
 Content-Disposition: form-data; name="_____dummy" \
         \
@@ -133,8 +137,8 @@ Content-Disposition: form-data; name="dnf_class_values[procurement_notice][recov
 Content-Disposition: form-data; name="dnf_class_values[procurement_notice][keywords]"\
         \
 '
-    if keyword is not None:
-        data += keyword + "\n"
+    if keyword_name is not None:
+        data += keyword_name + "\n"
     data += '------WebKitFormBoundaryEY5KmOxkY2tN5Bbk\
 Content-Disposition: form-data; name="dnf_class_values[procurement_notice][naics_code][]"\
         \
@@ -233,16 +237,11 @@ Search\
     print "Found entries: ", len(rows)
     for row in rows:
         link = row.find("a", {"class": "lst-lnk-notice"})
-        link_href = link['href']
-        print link_href
-        link_text = link.find("div", {"class": "solt"}).text
-        print link_text
-
-
-
-
-
-
+        url = link['href']
+        print url
+        title = link.find("div", {"class": "solt"}).text
+        opportunity =  Opportunity.objects.get_or_create(url=url, title=title)[0]
+        KeywordOpportunity.objects.get_or_create(opportunity=opportunity, keyword=keyword)
         # br = mechanize.Browser()
         # br.open(url)
         # br.select_form('vendor_procurement_notice_search')
@@ -251,10 +250,6 @@ Search\
         #
         # response = br.submit()
         # print response
-
-
-
-
 
 
 def scrape_from_normal_search():
@@ -285,4 +280,4 @@ def scrape_from_normal_search():
 
 
 
-scrape_from_advance_search()
+        # scrape_from_advance_search()
