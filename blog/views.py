@@ -2,7 +2,7 @@ import json
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
-from .models import UserKeyword, UserCode, Code, Keyword
+from .models import UserKeyword, UserCode, Code, Keyword, KeywordOpportunity
 from django.contrib.auth.models import User
 from django.shortcuts import HttpResponse
 from django.http import Http404
@@ -33,7 +33,7 @@ def login(request):
             return HttpResponse(json.dumps({"message": "Enter valid credentials"}),
                                 content_type="application/json")
     else:
-        return render(request, 'blog/login.html', {})
+        return render(request, 'login.html', {})
 
 
 def signup(request):
@@ -59,7 +59,7 @@ def signup(request):
         return HttpResponse(json.dumps({"message": "Passwords don't match", "success": False}),
                             content_type="application/json")
     else:
-        return render(request, 'blog/signup.html', {})
+        return render(request, 'signup.html', {})
 
 
 def logout(request):
@@ -118,14 +118,15 @@ def add_code(request):
         raise Http404("Not Found")
 
 
-def get_profile(request):
+def profile(request):
     user = request.user
     if not user.is_authenticated():
         return redirect_to_login()
-    user_keywords = UserKeyword.objects.filter(user=user)
-    user_codes = UserCode.objects.all()
-    context = {'user_keywords': user_keywords, 'user_codes': user_codes}
-    return render(request, 'blog/profile.html', context)
+    keyword_ids = UserKeyword.objects.filter(user=user).values('keyword__id')
+    keyword_opportunities = KeywordOpportunity.objects.filter(keyword__id__in=keyword_ids)
+
+    context = {'keyword_opportunities': keyword_opportunities}
+    return render(request, 'profile.html', context)
 
 
 def home(request):
@@ -137,5 +138,5 @@ def home(request):
         user_keywords = UserKeyword.objects.filter(user=user)
         user_codes = UserCode.objects.all()
         context = {'codes': all_codes, 'user_keywords': user_keywords, 'user_codes': user_codes}
-        return render(request, 'blog/home.html', context)
+        return render(request, 'home.html', context)
 

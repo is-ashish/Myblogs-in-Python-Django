@@ -17,6 +17,7 @@ class Command(BaseCommand):
                                           Q(last_scraped__isnull=True))
         for keyword in keywords:
             scrape_from_advance_search(keyword)
+            keyword.save()
 
 
 def scrape_from_advance_search(keyword):
@@ -240,7 +241,7 @@ Search\
         url = link['href']
         print url
         title = link.find("div", {"class": "solt"}).text
-        opportunity =  Opportunity.objects.get_or_create(url=url, title=title)[0]
+        opportunity = Opportunity.objects.get_or_create(url=url, title=title)[0]
         KeywordOpportunity.objects.get_or_create(opportunity=opportunity, keyword=keyword)
         # br = mechanize.Browser()
         # br.open(url)
