@@ -1,4 +1,4 @@
-from time import timezone
+from django.utils import timezone
 
 __author__ = 'Vishwash Gupta'
 
