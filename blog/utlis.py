@@ -3,7 +3,7 @@ from time import timezone
 __author__ = 'Vishwash Gupta'
 
 from django.db import transaction
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import requests
 from blog.models import Opportunity, KeywordOpportunity
 
