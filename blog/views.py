@@ -1,7 +1,11 @@
 import json
+import threading
+import datetime
+from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
+from blog.utlis import scrape_from_advance_search
 from .models import UserKeyword, UserCode, Code, Keyword, KeywordOpportunity
 from django.contrib.auth.models import User
 from django.shortcuts import HttpResponse
@@ -82,14 +86,28 @@ def add_keyword(request):
         user = request.user
         if not user.is_authenticated():
             return HttpResponse("Not Authenticated")
-        keyword = Keyword.objects.get_or_create(name=word)[0]
+
+        if word is None:
+            return HttpResponse(json.dumps({"message": "Invalid Keyword"}),
+                                content_type="application/json")
+        word = word.strip()
+        if word == "":
+            return HttpResponse(json.dumps({"message": "Invalid Keyword"}),
+                                content_type="application/json")
+        keyword_query = Keyword.objects.get_or_create(name=word)
+        keyword = keyword_query[0]
+        keyword_created = keyword_query[1]
         try:
             UserKeyword.objects.get(keyword=keyword, user=user)
             return HttpResponse(json.dumps({"message": "Keyword already present"}),
                                 content_type="application/json")
         except UserKeyword.DoesNotExist:
             UserKeyword.objects.create(keyword=keyword, user=user)
-            return HttpResponse(json.dumps({"message": "Keyword added"}),
+            # if keyword.last_scraped is None or keyword.last_scraped > timezone.time() - datetime.timedelta(days=1):
+            if keyword_created or keyword.last_scraped is None or keyword.last_scraped <= timezone.now() - datetime.timedelta(days=1):
+                t = threading.Thread(target=scrape_from_advance_search, args=(keyword,))
+                t.start()
+            return HttpResponse(json.dumps({"message": "Keyword added", "keyword": word}),
                                 content_type="application/json")
     else:
         raise Http404("Not Found")
@@ -101,9 +119,12 @@ def add_code(request):
         user = request.user
         if not user.is_authenticated():
             return HttpResponse("Not Authenticated")
+        if code is None:
+            return HttpResponse(json.dumps({"message": "Invalid code"}),
+                                content_type="application/json")
         try:
             code = Code.objects.get(id=code)
-        except:
+        except Code.DoesNotExist:
             return HttpResponse(json.dumps({"message": "Invalid code"}),
                                 content_type="application/json")
         try:
@@ -112,7 +133,7 @@ def add_code(request):
                                 content_type="application/json")
         except UserCode.DoesNotExist:
             UserCode.objects.create(code=code, user=user)
-            return HttpResponse(json.dumps({"message": "code added"}),
+            return HttpResponse(json.dumps({"message": "code added", "code": code.code}),
                                 content_type="application/json")
     else:
         raise Http404("Not Found")

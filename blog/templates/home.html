@@ -16,13 +16,20 @@
         $("document").ready(function () {
             $('#form').submit(function (e) {
                 var urls = "/add-keyword/";
+                var form = $(this);
+                var data = $(this).serializeArray();
                 $.ajax({
                     type: "POST",
                     url: urls,
 
-                    data: $('#form').serialize(),
+                    data: data,
                     success: function (data) {
                         alert(data['message']);
+                        if(data['keyword']){
+                            form[0].reset();
+                            $("#keyword-table tbody").append("<tr><td>" + data['keyword'] + "</td></tr>")
+                        }
+
                     }
                 });
                 e.preventDefault();
@@ -34,13 +41,18 @@
         $("document").ready(function () {
             $('#code_form').submit(function (e) {
                 var urls = "/add-code/";
+                var form = $(this);
+                var data = $(this).serializeArray();
                 $.ajax({
                     type: "POST",
                     url: urls,
-
-                    data: $('#code_form').serialize(),
+                    data: data,
                     success: function (data) {
                         alert(data['message']);
+                        if(data['code']){
+                            form[0].reset();
+                            $("#code-table tbody").append("<tr><td>" + data['code'] + "</td></tr>")
+                        }
                     }
                 });
                 e.preventDefault();
@@ -79,7 +91,7 @@
         <br><br>
 
         <div class="row">
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered table-striped" id="keyword-table">
                 <thead>
                 <tr>
                     <th> Subscribed keywords</th>
@@ -109,7 +121,7 @@
                     <select name="code_id" class="form-control" required="">
                         <option value="">Select a code</option>
                         {% for code in codes %}
-                            <option value="{{ str.id }}">{{ code.code }}</option>
+                            <option value="{{ code.id }}">{{ code.code }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -130,7 +142,7 @@
             <br/><br/>
         </div>
         <div class="row">
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered table-striped" id="code-table">
                 <thead>
                 <tr>
                     <th> Subscribed codes</th>
@@ -154,9 +166,6 @@
         </form>{% endcomment %}
     </div>
 </div>
-
-
-<h2><a href="{% url 'blog:logout' %}">Logout</a></h2>
 
 
 </body>

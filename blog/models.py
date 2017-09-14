@@ -23,7 +23,7 @@ class UserKeyword(BaseModel):
     user = models.ForeignKey(User)
 
     def __str__(self):
-        return self.keyword
+        return self.keyword.name
 
     class Meta:
         unique_together = (("user", "keyword"),)
