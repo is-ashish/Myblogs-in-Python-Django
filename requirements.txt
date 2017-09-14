@@ -5,7 +5,6 @@ html5lib==0.999999999
 idna==2.6
 mechanize==0.3.5
 pytz==2017.2
-pywin32==221
 requests==2.18.4
 six==1.10.0
 urllib3==1.22
