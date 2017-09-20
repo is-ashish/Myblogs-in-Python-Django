@@ -22,6 +22,7 @@
             <tr>
                 <th>Job Title</th>
                 <th>Related Keyword</th>
+                <th>Posted On</th>
                 <th>View Page</th>
             </tr>
             </thead>
@@ -30,6 +31,7 @@
                 <tr>
                     <td>{{ keyword_opportunity.opportunity.title }}</td>
                     <td>{{ keyword_opportunity.keyword.name }}</td>
+                    <td>{% if keyword_opportunity.opportunity.posted_on %}{{ keyword_opportunity.opportunity.posted_on }}{% endif %}</td>
                     <td><a href="https://www.fbo.gov/index{{ keyword_opportunity.opportunity.url }}">View Original</a></td>
                 </tr>
             {% endfor %}

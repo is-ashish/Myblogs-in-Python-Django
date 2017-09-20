@@ -97,6 +97,9 @@ def add_keyword(request):
         keyword_query = Keyword.objects.get_or_create(name=word)
         keyword = keyword_query[0]
         keyword_created = keyword_query[1]
+        if keyword_created or keyword.last_scraped is None or keyword.last_scraped <= timezone.now() - datetime.timedelta(days=1):
+                t = threading.Thread(target=scrape_from_advance_search_keyword, args=(keyword,))
+                t.start()
         try:
             UserKeyword.objects.get(keyword=keyword, user=user)
             return HttpResponse(json.dumps({"message": "Keyword already present"}),
@@ -104,9 +107,6 @@ def add_keyword(request):
         except UserKeyword.DoesNotExist:
             UserKeyword.objects.create(keyword=keyword, user=user)
             # if keyword.last_scraped is None or keyword.last_scraped > timezone.time() - datetime.timedelta(days=1):
-            if keyword_created or keyword.last_scraped is None or keyword.last_scraped <= timezone.now() - datetime.timedelta(days=1):
-                t = threading.Thread(target=scrape_from_advance_search_keyword, args=(keyword,))
-                t.start()
             return HttpResponse(json.dumps({"message": "Keyword added", "keyword": word}),
                                 content_type="application/json")
     else:

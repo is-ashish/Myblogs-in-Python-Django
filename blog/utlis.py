@@ -12,9 +12,12 @@ def update_opportunities_for_keyword(keyword, rows):
     for row in rows:
         link = row.find("a", {"class": "lst-lnk-notice"})
         url = link['href']
-        print url, keyword.name
         title = link.find("div", {"class": "solt"}).text
+        date = row.find("td", {"headers": "lh_current_posted_date"}).text
+        print keyword.name, " ---> ", title, date
         opportunity = Opportunity.objects.get_or_create(url=url, title=title)[0]
+        opportunity.posted_on = date
+        opportunity.save()
         KeywordOpportunity.objects.get_or_create(opportunity=opportunity, keyword=keyword)
         # br = mechanize.Browser()
         # br.open(url)
@@ -30,9 +33,13 @@ def update_opportunities_for_code(code, rows):
     for row in rows:
         link = row.find("a", {"class": "lst-lnk-notice"})
         url = link['href']
-        print url, code.code
+
         title = link.find("div", {"class": "solt"}).text
+        date = row.find("td", {"headers": "lh_current_posted_date"}).text
+        print code.code, " ---> ", title, date
         opportunity = Opportunity.objects.get_or_create(url=url, title=title)[0]
+        opportunity.posted_on = date
+        opportunity.save()
         CodeOpportunity.objects.get_or_create(opportunity=opportunity, code=code)
 
 
