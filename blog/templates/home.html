@@ -121,7 +121,7 @@
                     <select name="code_id" class="form-control" required="">
                         <option value="">Select a code</option>
                         {% for code in codes %}
-                            <option value="{{ code.id }}">{{ code.code }}</option>
+                            <option value="{{ code.code_id }}">{{ code.code }}</option>
                         {% endfor %}
                     </select>
                 </div>

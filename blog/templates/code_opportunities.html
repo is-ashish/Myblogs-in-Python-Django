@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous">
+    </script>
+</head>
+<body>
+{% include 'header.html' %}
+<div class="container">
+    <div class="col-md-12">
+        <h3 class="text-center">Search Results</h3> <br/>
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>Job Title</th>
+                <th>Related Keyword</th>
+                <th>View Page</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for code_opportunity in code_opportunities %}
+                <tr>
+                    <td>{{ code_opportunity.opportunity.title }}</td>
+                    <td>{{ code_opportunity.code.code}}</td>
+                    <td><a href="https://www.fbo.gov/index{{ code_opportunity.opportunity.url }}">View Original</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+</body>
+</html>
+
+
+

@@ -2,7 +2,7 @@ __author__ = 'Vishwash Gupta'
 
 from threading import Thread
 from Queue import Queue
-from blog.utlis import scrape_from_advance_search
+from blog.utlis import scrape_from_advance_search_keyword
 
 class Worker(Thread):
     """ Thread executing tasks from a given tasks queue """
@@ -55,7 +55,7 @@ from time import sleep
 def scrape(keyword):
     # Function to be executed in a thread
     def wait_delay(d):
-        scrape_from_advance_search(keyword)
+        scrape_from_advance_search_keyword(keyword)
 
     # Generate random delays
     delays = [randrange(3, 7) for i in range(50)]

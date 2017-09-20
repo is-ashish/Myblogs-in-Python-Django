@@ -9,7 +9,8 @@ urlpatterns = [
     url(r'^signup/$', signup, name='signup'),
     url(r'^add-keyword/$', add_keyword, name='add_keyword'),
     url(r'^add-code/$', add_code, name='add_code'),
-    url(r'^profile/$', profile, name='profile'),
+    url(r'^keyword-opportunities/$', profile, name='profile'),
+    url(r'^code-opportunities/$', code_opportunities, name='code_opportunities'),
     url(r'^', home, name='home'),
     url(r'^admin/', admin.site.urls),
 ]

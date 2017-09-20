@@ -5,8 +5,8 @@ from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
-from blog.utlis import scrape_from_advance_search
-from .models import UserKeyword, UserCode, Code, Keyword, KeywordOpportunity
+from blog.utlis import scrape_from_advance_search_keyword, scrape_from_advance_search_code
+from .models import UserKeyword, UserCode, Code, Keyword, KeywordOpportunity, CodeOpportunity
 from django.contrib.auth.models import User
 from django.shortcuts import HttpResponse
 from django.http import Http404
@@ -105,7 +105,7 @@ def add_keyword(request):
             UserKeyword.objects.create(keyword=keyword, user=user)
             # if keyword.last_scraped is None or keyword.last_scraped > timezone.time() - datetime.timedelta(days=1):
             if keyword_created or keyword.last_scraped is None or keyword.last_scraped <= timezone.now() - datetime.timedelta(days=1):
-                t = threading.Thread(target=scrape_from_advance_search, args=(keyword,))
+                t = threading.Thread(target=scrape_from_advance_search_keyword, args=(keyword,))
                 t.start()
             return HttpResponse(json.dumps({"message": "Keyword added", "keyword": word}),
                                 content_type="application/json")
@@ -123,7 +123,7 @@ def add_code(request):
             return HttpResponse(json.dumps({"message": "Invalid code"}),
                                 content_type="application/json")
         try:
-            code = Code.objects.get(id=code)
+            code = Code.objects.get(code_id=code)
         except Code.DoesNotExist:
             return HttpResponse(json.dumps({"message": "Invalid code"}),
                                 content_type="application/json")
@@ -133,6 +133,9 @@ def add_code(request):
                                 content_type="application/json")
         except UserCode.DoesNotExist:
             UserCode.objects.create(code=code, user=user)
+            if code.last_scraped is None or code.last_scraped <= timezone.now() - datetime.timedelta(days=1):
+                t = threading.Thread(target=scrape_from_advance_search_code, args=(code,))
+                t.start()
             return HttpResponse(json.dumps({"message": "code added", "code": code.code}),
                                 content_type="application/json")
     else:
@@ -149,6 +152,16 @@ def profile(request):
     context = {'keyword_opportunities': keyword_opportunities}
     return render(request, 'profile.html', context)
 
+
+def code_opportunities(request):
+    user = request.user
+    if not user.is_authenticated():
+        return redirect_to_login()
+    code_ids = UserCode.objects.filter(user=user).values('code__id')
+    code_opportunities = CodeOpportunity.objects.filter(code__id__in=code_ids)
+
+    context = {'code_opportunities': code_opportunities}
+    return render(request, 'code_opportunities.html', context)
 
 def home(request):
     user = request.user

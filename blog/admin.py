@@ -29,3 +29,11 @@ class KeywordOpportunityAdmin(admin.ModelAdmin):
 
 admin.site.register(KeywordOpportunity, KeywordOpportunityAdmin)
 
+
+class CodeOpportunityAdmin(admin.ModelAdmin):
+    list_display = ("code", "opportunity")
+    search_fields = ("opportunity__title", "opportunity__url", "code__code", "code__code_id")
+
+
+admin.site.register(CodeOpportunity, CodeOpportunityAdmin)
+
