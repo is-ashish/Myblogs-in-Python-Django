@@ -9,6 +9,8 @@ from blog.models import Opportunity, KeywordOpportunity, CodeOpportunity, Code, 
 from selenium import webdriver
 import time
 
+PHANTOM_JS_PATH = "/usr/bin/phantomjs"
+# PHANTOM_JS_PATH = "F:/vishwash/google_archive/phantomjs.exe"
 
 def update_opportunities_for_keyword(keyword, rows):
     for row in rows:
@@ -524,8 +526,7 @@ def scrape_codes():
 
 
 def scrape_keyword_in_selenium(keyword):
-    # selenium = webdriver.PhantomJS(executable_path="/usr/bin/phantomjs")
-    selenium = webdriver.PhantomJS(executable_path="F:/vishwash/google_archive/phantomjs.exe")
+    selenium = webdriver.PhantomJS(executable_path=PHANTOM_JS_PATH)
     selenium.get('https://www.fbo.gov/index?s=opportunity&mode=list&tab=search&tabmode=list')
     keyword_input = selenium.find_element_by_name('dnf_class_values[procurement_notice][keywords]')
     submit = selenium.find_element_by_name('dnf_opt_submit')
@@ -543,8 +544,7 @@ def scrape_keyword_in_selenium(keyword):
 
 
 def scrape_code_in_selenium(code):
-    # selenium = webdriver.PhantomJS(executable_path="/usr/bin/phantomjs")
-    selenium = webdriver.PhantomJS(executable_path="F:/vishwash/google_archive/phantomjs.exe")
+    selenium = webdriver.PhantomJS(executable_path=PHANTOM_JS_PATH)
     selenium.get('https://www.fbo.gov/index?s=opportunity&mode=list&tab=search&tabmode=list')
     keyword_input = selenium.find_element_by_name('dnf_class_values[procurement_notice][keywords]')
     submit = selenium.find_element_by_name('dnf_opt_submit')
@@ -564,8 +564,7 @@ def scrape_code_in_selenium(code):
 
 
 def scrape_user_request_opportunities_in_selenium(user_request):
-    # selenium = webdriver.PhantomJS(executable_path="/usr/bin/phantomjs")
-    selenium = webdriver.PhantomJS(executable_path="F:/vishwash/google_archive/phantomjs.exe")
+    selenium = webdriver.PhantomJS(executable_path=PHANTOM_JS_PATH)
     selenium.get('https://www.fbo.gov/index?s=opportunity&mode=list&tab=search&tabmode=list')
     keyword_input = selenium.find_element_by_name('dnf_class_values[procurement_notice][keywords]')
     submit = selenium.find_element_by_name('dnf_opt_submit')
