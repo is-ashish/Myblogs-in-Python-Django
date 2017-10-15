@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import requests
 from blog.models import Opportunity, KeywordOpportunity, CodeOpportunity, Code, UserRequestOpportunity
 from selenium import webdriver
+from pyvirtualdisplay import Display
 import time
 
 PHANTOM_JS_PATH = "/usr/bin/phantomjs"
@@ -565,7 +566,10 @@ def scrape_code_in_selenium(code):
 
 def scrape_user_request_opportunities_in_selenium(user_request):
     print "scraping opportunities for user_request %s", user_request.id
-    selenium = webdriver.PhantomJS(executable_path=PHANTOM_JS_PATH)
+    display = Display(visible=0, size=(800, 600))
+    display.start()
+    print "display start"
+    selenium = webdriver.Firefox()
     print "selenium initialized"
     selenium.get('https://www.fbo.gov/index?s=opportunity&mode=list&tab=search&tabmode=list')
     print "URL opened"
@@ -606,3 +610,6 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     user_request.last_scraped = timezone.now()
     user_request.save()
     print "successfully scraped for user request %s" % user_request.id
+    selenium.quit()
+    #print "Browser Closed"
+    display.stop()
