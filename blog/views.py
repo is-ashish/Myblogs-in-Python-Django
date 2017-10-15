@@ -5,7 +5,8 @@ from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
-from blog.utlis import scrape_from_advance_search_keyword, scrape_from_advance_search_code
+from blog.models import UserRequest
+from blog.utils import scrape_from_advance_search_keyword, scrape_from_advance_search_code, scrape_keyword_in_selenium, scrape_user_request_opportunities_in_selenium
 from .models import UserKeyword, UserCode, Code, Keyword, KeywordOpportunity, CodeOpportunity
 from django.contrib.auth.models import User
 from django.shortcuts import HttpResponse
@@ -97,9 +98,10 @@ def add_keyword(request):
         keyword_query = Keyword.objects.get_or_create(name=word)
         keyword = keyword_query[0]
         keyword_created = keyword_query[1]
-        if keyword_created or keyword.last_scraped is None or keyword.last_scraped <= timezone.now() - datetime.timedelta(days=1):
-                t = threading.Thread(target=scrape_from_advance_search_keyword, args=(keyword,))
-                t.start()
+        if keyword_created or keyword.last_scraped is None or keyword.last_scraped <= timezone.now() - datetime.timedelta(
+                days=1):
+            t = threading.Thread(target=scrape_keyword_in_selenium, args=(keyword,))
+            t.start()
         try:
             UserKeyword.objects.get(keyword=keyword, user=user)
             return HttpResponse(json.dumps({"message": "Keyword already present"}),
@@ -153,6 +155,16 @@ def profile(request):
     return render(request, 'profile.html', context)
 
 
+def list_user_opportunities(request):
+    user = request.user
+    if not user.is_authenticated():
+        return redirect_to_login()
+    user_requests = UserRequest.objects.filter().order_by('-id')
+    context = {'user_requests': user_requests}
+    return render(request, 'user_requests.html', context)
+
+
+
 def code_opportunities(request):
     user = request.user
     if not user.is_authenticated():
@@ -163,7 +175,8 @@ def code_opportunities(request):
     context = {'code_opportunities': code_opportunities}
     return render(request, 'code_opportunities.html', context)
 
-def home(request):
+
+def subscribe(request):
     user = request.user
     if not user.is_authenticated():
         return redirect_to_login()
@@ -174,3 +187,55 @@ def home(request):
         context = {'codes': all_codes, 'user_keywords': user_keywords, 'user_codes': user_codes}
         return render(request, 'home.html', context)
 
+
+
+def home(request):
+    user = request.user
+    if not user.is_authenticated():
+        return redirect_to_login()
+    else:
+        all_codes = Code.objects.all()
+        user_keywords = UserKeyword.objects.filter(user=user)
+        user_codes = UserCode.objects.all()
+        context = {'codes': all_codes, 'user_keywords': user_keywords, 'user_codes': user_codes}
+        return render(request, 'home2.html', context)
+
+
+def test(request):
+    user_request = UserRequest.objects.get(id=4)
+    scrape_user_request_opportunities_in_selenium(user_request)
+    return HttpResponse("success")
+
+
+def add_opportunity_request(request):
+    if request.method == 'POST':
+        words = request.POST.getlist('keyword')
+        code_ids = request.POST.getlist('codes')
+        user = request.user
+        if not user.is_authenticated():
+            return HttpResponse("Not Authenticated")
+        print words
+        print code_ids
+        keywords = []
+        for word in words:
+            if word is not None:
+                word = word.strip()
+                if word != "":
+                    keyword_query = Keyword.objects.get_or_create(name=word)
+                    keyword = keyword_query[0]
+                    keywords.append(keyword)
+        codes = Code.objects.filter(code_id__in=code_ids)
+        if len(keywords) == 0 and len(codes) == 0:
+            return HttpResponse(json.dumps({"message": "Please enter valid keyword or codes"}),
+                                content_type="application/json")
+        user_request = UserRequest.objects.create(user=user)
+        user_request.keywords = keywords
+        user_request.codes = codes
+        user_request.save()
+        if user_request.last_scraped is None or user_request.last_scraped <= timezone.now() - datetime.timedelta(days=1):
+                t = threading.Thread(target=scrape_user_request_opportunities_in_selenium, args=(user_request,))
+                t.start()
+        return HttpResponse(json.dumps({"message": "Request added", "keywords": words, "codes": code_ids}),
+                            content_type="application/json")
+    else:
+        raise Http404("Not Found")

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>Search Opportunities</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous">
+    </script>
+    <script>
+        $("document").ready(function () {
+            $('#form').submit(function (e) {
+                var urls = "/add-opportunity-request/";
+                var form = $(this);
+                var data = $(this).serializeArray();
+                $.ajax({
+                    type: "POST",
+                    url: urls,
+
+                    data: data,
+                    success: function (data) {
+                        alert(data['message']);
+                        if(data['keyword']){
+                            form[0].reset();
+                            $("#keyword-table tbody").append("<tr><td>" + data['keyword'] + "</td></tr>")
+                        }
+
+                    }
+                });
+                e.preventDefault();
+            });
+        });
+
+    </script>
+</head>
+<body>
+{% include 'header.html' %}
+<div class="container">
+    <div class="col-md-10">
+        <div class="row">
+            <h3>Search Opportunities</h3>
+
+            <form id="form" method="post" action="{% url 'blog:add_opportunity_request' %}" class="form-inline">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="sr-only" for="exampleInputEmail3">Keyword</label>
+                    <input type="text" class="form-control" id="exampleInputEmail3" placeholder="Enter Keyword"
+                           name="keyword" style="width: 400px;">
+                </div>
+                <br><br>
+                <div class="form-group">
+                    <label class="sr-only" for="exampleInputEmail3">Keyword</label>
+                    <select name="codes" class="form-control" multiple="multiple" style="height:400px;">
+                        <option value="">Select a code</option>
+                        {% for code in codes %}
+                            <option value="{{ code.code_id }}">{{ code.code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <br><br>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+
+        </div>
+        <br><br>
+
+
+
+    </div>
+
+</div>
+
+
+</body>
+</html>
+

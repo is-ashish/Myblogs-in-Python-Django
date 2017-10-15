@@ -5,7 +5,9 @@ __author__ = 'Vishwash Gupta'
 from django.db import transaction
 from bs4 import BeautifulSoup
 import requests
-from blog.models import Opportunity, KeywordOpportunity, CodeOpportunity, Code
+from blog.models import Opportunity, KeywordOpportunity, CodeOpportunity, Code, UserRequestOpportunity
+from selenium import webdriver
+import time
 
 
 def update_opportunities_for_keyword(keyword, rows):
@@ -33,7 +35,6 @@ def update_opportunities_for_code(code, rows):
     for row in rows:
         link = row.find("a", {"class": "lst-lnk-notice"})
         url = link['href']
-
         title = link.find("div", {"class": "solt"}).text
         date = row.find("td", {"headers": "lh_current_posted_date"}).text
         print code.code, " ---> ", title, date
@@ -42,6 +43,23 @@ def update_opportunities_for_code(code, rows):
         opportunity.save()
         CodeOpportunity.objects.get_or_create(opportunity=opportunity, code=code)
 
+
+def update_opportunities_for_user_request(user_request, rows):
+    for row in rows:
+        link = row.find("a", {"class": "lst-lnk-notice"})
+        url = link['href']
+
+        title = link.find("div", {"class": "solt"}).text
+        date = row.find("td", {"headers": "lh_current_posted_date"}).text
+        print user_request.id, " ---> ", title, date
+        opportunity = Opportunity.objects.get_or_create(url=url, title=title)[0]
+        opportunity.posted_on = date
+        opportunity.save()
+        UserRequestOpportunity.objects.get_or_create(opportunity=opportunity, user_request=user_request)
+        for keyword in user_request.keywords.all():
+            KeywordOpportunity.objects.get_or_create(opportunity=opportunity, keyword=keyword)
+        for code in user_request.codes.all():
+            CodeOpportunity.objects.get_or_create(opportunity=opportunity, code=code)
 
 @transaction.atomic
 def scrape_from_advance_search_keyword(keyword):
@@ -503,3 +521,81 @@ def scrape_codes():
         label_tag = code_section_div.find("label")
         print input_tag['value'], label_tag.text
         Code.objects.get_or_create(code=label_tag.text, code_id=input_tag['value'])
+
+
+def scrape_keyword_in_selenium(keyword):
+    # selenium = webdriver.PhantomJS(executable_path="/usr/bin/phantomjs")
+    selenium = webdriver.PhantomJS(executable_path="F:/vishwash/google_archive/phantomjs.exe")
+    selenium.get('https://www.fbo.gov/index?s=opportunity&mode=list&tab=search&tabmode=list')
+    keyword_input = selenium.find_element_by_name('dnf_class_values[procurement_notice][keywords]')
+    submit = selenium.find_element_by_name('dnf_opt_submit')
+    keyword_input.send_keys(keyword.name)
+    submit.click()
+    html_content = selenium.page_source
+    soup = BeautifulSoup(html_content, "html5lib")
+    even_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-even"})
+    update_opportunities_for_keyword(keyword, even_rows)
+    odd_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-odd"})
+    update_opportunities_for_keyword(keyword, odd_rows)
+    keyword.last_scraped = timezone.now()
+    keyword.save()
+    print "successfully scraped for keyword %s" % keyword.name
+
+
+def scrape_code_in_selenium(code):
+    # selenium = webdriver.PhantomJS(executable_path="/usr/bin/phantomjs")
+    selenium = webdriver.PhantomJS(executable_path="F:/vishwash/google_archive/phantomjs.exe")
+    selenium.get('https://www.fbo.gov/index?s=opportunity&mode=list&tab=search&tabmode=list')
+    keyword_input = selenium.find_element_by_name('dnf_class_values[procurement_notice][keywords]')
+    submit = selenium.find_element_by_name('dnf_opt_submit')
+    selenium.find_element_by_xpath(
+        ".//*[contains(@title, 'NAICS Code: " + code.code + "')]"
+    ).click()
+    submit.click()
+    html_content = selenium.page_source
+    soup = BeautifulSoup(html_content, "html5lib")
+    even_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-even"})
+    update_opportunities_for_code(code, even_rows)
+    odd_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-odd"})
+    update_opportunities_for_code(code, odd_rows)
+    code.last_scraped = timezone.now()
+    code.save()
+    print "successfully scraped for code %s" % code.code
+
+
+def scrape_user_request_opportunities_in_selenium(user_request):
+    # selenium = webdriver.PhantomJS(executable_path="/usr/bin/phantomjs")
+    selenium = webdriver.PhantomJS(executable_path="F:/vishwash/google_archive/phantomjs.exe")
+    selenium.get('https://www.fbo.gov/index?s=opportunity&mode=list&tab=search&tabmode=list')
+    keyword_input = selenium.find_element_by_name('dnf_class_values[procurement_notice][keywords]')
+    submit = selenium.find_element_by_name('dnf_opt_submit')
+    keywords = user_request.keywords.all()
+    codes = user_request.codes.all()
+    if len(codes) == 0 or len(keywords) == 0:
+        return
+
+    if len(keywords) > 0:
+        keyword_input.send_keys(keywords[0].name)
+    if len(codes) > 0:
+        for code in codes:
+            selenium.find_element_by_xpath(
+                ".//*[contains(@title, 'NAICS Code: " + code.code + "')]"
+            ).click()
+    submit.click()
+    html_content = selenium.page_source
+    soup = BeautifulSoup(html_content, "html5lib")
+    rows = soup.findAll("tr")
+    final_rows = []
+    for row in rows:
+        if 'id' in row.attrs:
+            element_id = row.attrs['id']
+            if element_id is not None and "row" in element_id:
+                final_rows.append(row)
+    # even_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-even"})
+    # update_opportunities_for_user_request(user_request, even_rows)
+    # odd_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-odd"})
+    # update_opportunities_for_user_request(user_request, odd_rows)
+    update_opportunities_for_user_request(user_request, final_rows)
+    user_request.last_scraped = timezone.now()
+    user_request.save()
+    print "successfully scraped for user request %s" % user_request.id
