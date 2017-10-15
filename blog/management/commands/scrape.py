@@ -1,27 +1,19 @@
+__author__ = 'Vishwash Gupta'
 import threading
 from django.utils import timezone
-
-__author__ = 'Vishwash Gupta'
 import datetime
 from django.core.management.base import BaseCommand
-from django.db.models import Q
-from blog.models import Keyword
-from blog.utlis import scrape_from_advance_search_keyword
-from blog import scrapper
+from blog.models import UserRequest
+from blog.utils import scrape_user_request_opportunities_in_selenium
+
 
 class Command(BaseCommand):
     # def add_arguments(self, parser):
     #   # parser.add_argument('hello')
 
     def handle(self, *args, **options):
-        keywords = Keyword.objects.filter(Q(last_scraped__lte=timezone.now() - datetime.timedelta(days=1)) |
-                                          Q(last_scraped__isnull=True))
-        for keyword in keywords:
-            try:
-                scrape_from_advance_search_keyword(keyword)
-                # t = threading.Thread(target=scrape_from_advance_search_keyword, args=(keyword,))
-                # t.start()
-
-            except Exception, e:
-                print "error in scraping for keyword %s", keyword.name
-                print e
+        user_requests = UserRequest.objects.all()
+        for user_request in user_requests:
+            if user_request.last_scraped is None or user_request.last_scraped <= timezone.now() - datetime.timedelta(days=1):
+                    t = threading.Thread(target=scrape_user_request_opportunities_in_selenium, args=(user_request,))
+                    t.start()
