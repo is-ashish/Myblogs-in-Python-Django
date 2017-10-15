@@ -564,6 +564,7 @@ def scrape_code_in_selenium(code):
 
 
 def scrape_user_request_opportunities_in_selenium(user_request):
+    print "scraping opportunities for user_request %s", user_request.id
     selenium = webdriver.PhantomJS(executable_path=PHANTOM_JS_PATH)
     selenium.get('https://www.fbo.gov/index?s=opportunity&mode=list&tab=search&tabmode=list')
     keyword_input = selenium.find_element_by_name('dnf_class_values[procurement_notice][keywords]')
@@ -571,6 +572,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     keywords = user_request.keywords.all()
     codes = user_request.codes.all()
     if len(codes) == 0 or len(keywords) == 0:
+        print "no codes and keywords found for the request. Finished"
         return
 
     if len(keywords) > 0:
@@ -582,6 +584,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
             ).click()
     submit.click()
     html_content = selenium.page_source
+    print "Found HTML Content from the FBO page"
     soup = BeautifulSoup(html_content, "html5lib")
     rows = soup.findAll("tr")
     final_rows = []
@@ -594,7 +597,9 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     # update_opportunities_for_user_request(user_request, even_rows)
     # odd_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-odd"})
     # update_opportunities_for_user_request(user_request, odd_rows)
+    print "No of Found Results - %s", len(final_rows)
     update_opportunities_for_user_request(user_request, final_rows)
+    print "Updated Opportunities"
     user_request.last_scraped = timezone.now()
     user_request.save()
     print "successfully scraped for user request %s" % user_request.id
