@@ -566,11 +566,14 @@ def scrape_code_in_selenium(code):
 def scrape_user_request_opportunities_in_selenium(user_request):
     print "scraping opportunities for user_request %s", user_request.id
     selenium = webdriver.PhantomJS(executable_path=PHANTOM_JS_PATH)
+    print "selenium initialized"
     selenium.get('https://www.fbo.gov/index?s=opportunity&mode=list&tab=search&tabmode=list')
+    print "URL opened"
     keyword_input = selenium.find_element_by_name('dnf_class_values[procurement_notice][keywords]')
     submit = selenium.find_element_by_name('dnf_opt_submit')
     keywords = user_request.keywords.all()
     codes = user_request.codes.all()
+    print "codes - %s, keywords - %s" % (len(codes), len(keywords))
     if len(codes) == 0 or len(keywords) == 0:
         print "no codes and keywords found for the request. Finished"
         return
