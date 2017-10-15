@@ -15,5 +15,4 @@ class Command(BaseCommand):
         user_requests = UserRequest.objects.all()
         for user_request in user_requests:
             if user_request.last_scraped is None or user_request.last_scraped <= timezone.now() - datetime.timedelta(days=1):
-                    t = threading.Thread(target=scrape_user_request_opportunities_in_selenium, args=(user_request,))
-                    t.start()
+                    scrape_user_request_opportunities_in_selenium(user_request)
