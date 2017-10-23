@@ -47,13 +47,18 @@ def update_opportunities_for_code(code, rows):
         CodeOpportunity.objects.get_or_create(opportunity=opportunity, code=code)
 
 
-def update_opportunities_for_user_request(user_request, rows):
+def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matched):
     for row in rows:
         link = row.find("a", {"class": "lst-lnk-notice"})
         url = link['href']
-
         title = link.find("div", {"class": "solt"}).text
+        description = link.find("div", {"class": "solcc"})
+        if keyword_to_be_matched is not None:
+            if keyword_to_be_matched not in title and (description is not None and
+                                                       keyword_to_be_matched in description.text):
+                continue
         date = row.find("td", {"headers": "lh_current_posted_date"}).text
+
         print user_request.id, " ---> ", title, date
         opportunity = Opportunity.objects.get_or_create(url=url, title=title)[0]
         opportunity.posted_on = date
@@ -569,6 +574,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     display = Display(visible=0, size=(800, 600))
     display.start()
     print "display start"
+    # selenium = webdriver.PhantomJS(executable_path=PHANTOM_JS_PATH)
     selenium = webdriver.Firefox()
     print "selenium initialized"
     selenium.get('https://www.fbo.gov/index?s=opportunity&mode=list&tab=search&tabmode=list')
@@ -581,9 +587,10 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     if len(codes) == 0 or len(keywords) == 0:
         print "no codes and keywords found for the request. Finished"
         return
-
+    keyword_to_be_matched = None
     if len(keywords) > 0:
-        keyword_input.send_keys(keywords[0].name)
+        keyword_to_be_matched = keywords[0].name
+        keyword_input.send_keys(keyword_to_be_matched)
     if len(codes) > 0:
         for code in codes:
             selenium.find_element_by_xpath(
@@ -605,7 +612,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     # odd_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-odd"})
     # update_opportunities_for_user_request(user_request, odd_rows)
     print "No of Found Results - %s", len(final_rows)
-    update_opportunities_for_user_request(user_request, final_rows)
+    update_opportunities_for_user_request(user_request, final_rows, keyword_to_be_matched)
     print "Updated Opportunities"
     user_request.last_scraped = timezone.now()
     user_request.save()
