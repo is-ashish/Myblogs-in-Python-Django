@@ -48,16 +48,22 @@ def update_opportunities_for_code(code, rows):
 
 
 def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matched):
+    updated_count = 0
     for row in rows:
         link = row.find("a", {"class": "lst-lnk-notice"})
         url = link['href']
         title = link.find("div", {"class": "solt"}).text
         description = link.find("div", {"class": "solcc"})
+        print "description --->",
         if description is not None:
-            print "description --->", description.text
+            print description.text
+            print keyword_to_be_matched
+            print keyword_to_be_matched.lower() in description.text.lower()
+        else:
+            print "not available"
         if keyword_to_be_matched is not None:
-            if keyword_to_be_matched.lower() not in title.lower() and (description is not None and
-                                                       keyword_to_be_matched.lower() in description.text.lower()):
+            if keyword_to_be_matched.lower() not in title.lower() and (
+                        description is not None and keyword_to_be_matched.lower() in description.text.lower()):
                 continue
         date = row.find("td", {"headers": "lh_current_posted_date"}).text
         print user_request.id, " ---> ", title, date
@@ -65,12 +71,13 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         opportunity = Opportunity.objects.get_or_create(url=url, title=title)[0]
         opportunity.posted_on = date
         opportunity.save()
+        updated_count += 1
         UserRequestOpportunity.objects.get_or_create(opportunity=opportunity, user_request=user_request)
         for keyword in user_request.keywords.all():
             KeywordOpportunity.objects.get_or_create(opportunity=opportunity, keyword=keyword)
         for code in user_request.codes.all():
             CodeOpportunity.objects.get_or_create(opportunity=opportunity, code=code)
-
+    print "total updated opportunities %s" %updated_count
 @transaction.atomic
 def scrape_from_advance_search_keyword(keyword):
     keyword_name = keyword.name
