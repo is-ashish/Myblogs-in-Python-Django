@@ -586,7 +586,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     keywords = user_request.keywords.all()
     codes = user_request.codes.all()
     print "codes - %s, keywords - %s" % (len(codes), len(keywords))
-    if len(codes) == 0 or len(keywords) == 0:
+    if len(codes) == 0 and len(keywords) == 0:
         print "no codes and keywords found for the request. Finished"
         return
     keyword_to_be_matched = None
