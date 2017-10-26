@@ -54,6 +54,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         url = link['href']
         title = link.find("div", {"class": "solt"}).text
         description = link.find("div", {"class": "solcc"})
+        print "title, ---> ", title
         print "description --->",
         if description is not None:
             print description.text
@@ -67,7 +68,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
                         description is not None and keyword_to_be_matched.lower() in description.text.lower()):
                 continue
         date = row.find("td", {"headers": "lh_current_posted_date"}).text
-        # print user_request.id, " ---> ", title, date
+        print user_request.id, " ---> ", title, date
 
         opportunity = Opportunity.objects.get_or_create(url=url, title=title)[0]
         opportunity.posted_on = date
