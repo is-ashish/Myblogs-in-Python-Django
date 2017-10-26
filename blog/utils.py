@@ -59,6 +59,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
             print description.text
             print keyword_to_be_matched
             print keyword_to_be_matched.lower() in description.text.lower()
+            print keyword_to_be_matched.lower() not in title.lower()
         else:
             print "not available"
         if keyword_to_be_matched is not None:
@@ -66,7 +67,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
                         description is not None and keyword_to_be_matched.lower() in description.text.lower()):
                 continue
         date = row.find("td", {"headers": "lh_current_posted_date"}).text
-        print user_request.id, " ---> ", title, date
+        # print user_request.id, " ---> ", title, date
 
         opportunity = Opportunity.objects.get_or_create(url=url, title=title)[0]
         opportunity.posted_on = date
