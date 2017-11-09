@@ -67,6 +67,7 @@ def validate_keyword_with_description(keyword_to_be_matched, description, title)
 def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matched, selenium):
     updated_count = 0
     for row in rows:
+        time.sleep(5)
         link = row.find("a", {"class": "lst-lnk-notice"})
         url = link['href']
         title = link.find("div", {"class": "solt"}).text
