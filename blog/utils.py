@@ -75,12 +75,12 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         print "title, ---> ", title
         selenium.get("https://www.fbo.gov/" + page_link)
         html_content = selenium.page_source
-        soup = BeautifulSoup(html_content, "html5lib")
+        description_soup = BeautifulSoup(html_content, "html5lib")
         try:
-            description = soup.find("div", {"id": "_fieldgroup__default_section"}).text
+            description = description_soup.find("div", {"id": "_fieldgroup__default_section"}).text
         except:
-            print "Could not Found description from the FBO Detail page "
-            continue
+            print "Could not Find description from the FBO Detail page ", html_content
+            return
         if not validate_keyword_with_description(keyword_to_be_matched, description, title):
             print "keyword didn't match so skipping the result"
             continue
