@@ -9,6 +9,7 @@ from blog.models import Opportunity, KeywordOpportunity, CodeOpportunity, Code, 
 from selenium import webdriver
 from pyvirtualdisplay import Display
 import time
+import re
 
 PHANTOM_JS_PATH = "/usr/bin/phantomjs"
 # PHANTOM_JS_PATH = "F:/vishwash/google_archive/phantomjs.exe"
@@ -47,26 +48,40 @@ def update_opportunities_for_code(code, rows):
         CodeOpportunity.objects.get_or_create(opportunity=opportunity, code=code)
 
 
-def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matched):
+def validate_keyword_with_description(keyword_to_be_matched, description, title):
+    description = description.lower()
+    title = title.lower()
+    print "description ->", description
+    keywords = [keyword_to_be_matched]
+    if keyword_to_be_matched is not None:
+        result = re.match('\"([\w\s,]*)\"', keyword_to_be_matched)
+        if result:
+            keywords = result.groups()[1:]
+        print "keywords->", keywords
+        for keyword in keywords:
+            if keyword.lower() not in title and keyword.lower() not in description:
+                return False
+    return True
+
+
+def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matched, selenium):
     updated_count = 0
     for row in rows:
         link = row.find("a", {"class": "lst-lnk-notice"})
         url = link['href']
         title = link.find("div", {"class": "solt"}).text
-        description = link.find("div", {"class": "solcc"})
+        page_link = row.find("a", {"class": "lst-lnk-notice"}).get('href')
+        #description = link.find("div", {"class": "solcc"})
         print "title, ---> ", title
-        print "description --->",
-        if description is not None:
-            print description.text
-            print keyword_to_be_matched
-            print keyword_to_be_matched.lower() in description.text.lower()
-            print keyword_to_be_matched.lower() not in title.lower()
-        else:
-            print "not available"
-        if keyword_to_be_matched is not None:
-            if keyword_to_be_matched.lower() not in title.lower() and (
-                        description is not None and keyword_to_be_matched.lower() not in description.text.lower()):
-                continue
+        selenium.get(page_link)
+        html_content = selenium.page_source
+        print "Found HTML Content from the FBO Detail page"
+        soup = BeautifulSoup(html_content, "html5lib")
+        description = soup.find("div", {"id": "dnf_class_values_procurement_notice__description__widget"}).text
+        if not validate_keyword_with_description(keyword_to_be_matched, description, title):
+            print "keyword didn't match so skipping the result"
+            continue
+
         date = row.find("td", {"headers": "lh_current_posted_date"}).text
         print user_request.id, " ---> ", title, date
 
@@ -80,6 +95,8 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         for code in user_request.codes.all():
             CodeOpportunity.objects.get_or_create(opportunity=opportunity, code=code)
     print "total updated opportunities %s" %updated_count
+
+
 @transaction.atomic
 def scrape_from_advance_search_keyword(keyword):
     keyword_name = keyword.name
@@ -623,7 +640,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     # odd_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-odd"})
     # update_opportunities_for_user_request(user_request, odd_rows)
     print "No of Found Results - %s", len(final_rows)
-    update_opportunities_for_user_request(user_request, final_rows, keyword_to_be_matched)
+    update_opportunities_for_user_request(user_request, final_rows, keyword_to_be_matched, selenium)
     print "Updated Opportunities"
     user_request.last_scraped = timezone.now()
     user_request.save()
