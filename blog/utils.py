@@ -73,9 +73,9 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         page_link = row.find("a", {"class": "lst-lnk-notice"}).get('href')
         #description = link.find("div", {"class": "solcc"})
         print "title, ---> ", title
-        selenium.get("https://www.fbo.gov/" +page_link)
+        selenium.get("https://www.fbo.gov/" + page_link)
         html_content = selenium.page_source
-        print "Found HTML Content from the FBO Detail page"
+        print "Found HTML Content from the FBO Detail page+ ", html_content
         soup = BeautifulSoup(html_content, "html5lib")
         description = soup.find("div", {"id": "dnf_class_values_procurement_notice__description__widget"}).text
         if not validate_keyword_with_description(keyword_to_be_matched, description, title):
