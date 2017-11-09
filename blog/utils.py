@@ -65,7 +65,8 @@ def validate_keyword_with_description(keyword_to_be_matched, description, title)
     return True
 
 
-def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matched, selenium):
+def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matched):
+    selenium = webdriver.Firefox()
     updated_count = 0
     for row in rows:
         link = row.find("a", {"class": "lst-lnk-notice"})
@@ -78,7 +79,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         html_content = selenium.page_source
         print "Found HTML Content from the FBO Detail page", html_content
         soup = BeautifulSoup(html_content, "html5lib")
-        print soup
+        print "soup-->", soup
         description = soup.find_element(By.ID, value="dnf_class_values_procurement_notice__description__widget").text
         if not validate_keyword_with_description(keyword_to_be_matched, description, title):
             print "keyword didn't match so skipping the result"
@@ -642,7 +643,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     # odd_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-odd"})
     # update_opportunities_for_user_request(user_request, odd_rows)
     print "No of Found Results - %s", len(final_rows)
-    update_opportunities_for_user_request(user_request, final_rows, keyword_to_be_matched, selenium)
+    update_opportunities_for_user_request(user_request, final_rows, keyword_to_be_matched)
     print "Updated Opportunities"
     user_request.last_scraped = timezone.now()
     user_request.save()
