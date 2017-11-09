@@ -77,7 +77,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         html_content = selenium.page_source
         soup = BeautifulSoup(html_content, "html5lib")
         try:
-            description = soup.find("div", {"id": "dnf_class_values_procurement_notice__description__widget"}).text
+            description = soup.find("div", {"id": "_fieldgroup__default_section"}).text
         except:
             print "Could not Found description from the FBO Detail page "
             continue
