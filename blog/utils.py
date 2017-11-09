@@ -613,11 +613,13 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     if len(codes) == 0 and len(keywords) == 0:
         print "no codes and keywords found for the request. Finished"
         return
-    keyword_to_be_matched = None
+    # keyword_to_be_matched = None
     if len(keywords) > 0:
-        keyword_list = [keywords[0].name]
+        keyword_to_be_matched = keywords[0].name
+        keyword_list = [keyword_to_be_matched]
         if keyword_to_be_matched is not None:
             result = re.match('\"([\w\s,]*)\"', keyword_to_be_matched)
+            print
             if result:
                 keyword_list = result.groups()[1:]
             print "keywords->", keyword_list
