@@ -621,7 +621,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
             if result:
                 keyword_list = result.groups()[1:]
             print "keywords->", keyword_list
-        keyword_input.send_keys(keyword_list.join(" "))
+        keyword_input.send_keys(" ".join(keyword_list))
     if len(codes) > 0:
         for code in codes:
             selenium.find_element_by_xpath(
