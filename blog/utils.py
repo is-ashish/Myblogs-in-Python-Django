@@ -48,23 +48,17 @@ def update_opportunities_for_code(code, rows):
         CodeOpportunity.objects.get_or_create(opportunity=opportunity, code=code)
 
 
-def validate_keyword_with_description(keyword_to_be_matched, description, title):
+def validate_keyword_with_description(keyword_list, description, title):
     description = description.lower()
     title = title.lower()
     # print "description ->", description
-    keywords = [keyword_to_be_matched]
-    if keyword_to_be_matched is not None:
-        result = re.match('\"([\w\s,]*)\"', keyword_to_be_matched)
-        if result:
-            keywords = result.groups()[1:]
-        print "keywords->", keywords
-        for keyword in keywords:
-            if keyword.lower() not in title and keyword.lower() not in description:
-                return False
+    for keyword in keyword_list:
+        if keyword.lower() not in title and keyword.lower() not in description:
+            return False
     return True
 
 
-def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matched, selenium):
+def update_opportunities_for_user_request(user_request, rows, keyword_list, selenium):
     updated_count = 0
     for row in rows:
         time.sleep(5)
@@ -82,7 +76,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         except:
             print "Could not Find description from the FBO Detail page ", html_content
             return
-        if not validate_keyword_with_description(keyword_to_be_matched, description, title):
+        if not validate_keyword_with_description(keyword_list, description, title):
             print "keyword didn't match so skipping the result"
             continue
 
@@ -621,8 +615,13 @@ def scrape_user_request_opportunities_in_selenium(user_request):
         return
     keyword_to_be_matched = None
     if len(keywords) > 0:
-        keyword_to_be_matched = keywords[0].name
-        keyword_input.send_keys(keyword_to_be_matched)
+        keyword_list = [keywords[0].name]
+        if keyword_to_be_matched is not None:
+            result = re.match('\"([\w\s,]*)\"', keyword_to_be_matched)
+            if result:
+                keyword_list = result.groups()[1:]
+            print "keywords->", keyword_list
+        keyword_input.send_keys(keyword_list.join(" "))
     if len(codes) > 0:
         for code in codes:
             selenium.find_element_by_xpath(
@@ -644,7 +643,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
     # odd_rows = soup.findAll("tr", {"class": "lst-rw lst-rw-odd"})
     # update_opportunities_for_user_request(user_request, odd_rows)
     print "No of Found Results - %s", len(final_rows)
-    update_opportunities_for_user_request(user_request, final_rows, keyword_to_be_matched, selenium)
+    update_opportunities_for_user_request(user_request, final_rows, keyword_list, selenium)
     print "Updated Opportunities"
     user_request.last_scraped = timezone.now()
     user_request.save()
