@@ -619,7 +619,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
         keyword_list = [keyword_to_be_matched]
         if keyword_to_be_matched is not None:
             result = re.match('\"([\w\s,]*)\"', keyword_to_be_matched)
-            print
+            print result
             if result:
                 keyword_list = result.groups()[1:]
             print "keywords->", keyword_list
