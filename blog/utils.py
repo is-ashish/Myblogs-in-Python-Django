@@ -77,7 +77,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         html_content = selenium.page_source
         print "Found HTML Content from the FBO Detail page"
         soup = BeautifulSoup(html_content, "html5lib")
-        description = soup.find("div", {"id": "dnf_class_values_procurement_notice__description__widget"}).text
+        description = soup.find_element_by_id("dnf_class_values_procurement_notice__description__widget").text
         if not validate_keyword_with_description(keyword_to_be_matched, description, title):
             print "keyword didn't match so skipping the result"
             continue
