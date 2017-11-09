@@ -51,7 +51,7 @@ def update_opportunities_for_code(code, rows):
 def validate_keyword_with_description(keyword_to_be_matched, description, title):
     description = description.lower()
     title = title.lower()
-    print "description ->", description
+    # print "description ->", description
     keywords = [keyword_to_be_matched]
     if keyword_to_be_matched is not None:
         result = re.match('\"([\w\s,]*)\"', keyword_to_be_matched)
@@ -79,7 +79,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         try:
             description = soup.find("div", {"id": "dnf_class_values_procurement_notice__description__widget"}).text
         except:
-            print "Could not Found description from the FBO Detail page+ "
+            print "Could not Found description from the FBO Detail page "
             continue
         if not validate_keyword_with_description(keyword_to_be_matched, description, title):
             print "keyword didn't match so skipping the result"
