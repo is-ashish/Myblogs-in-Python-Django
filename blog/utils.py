@@ -73,7 +73,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         page_link = row.find("a", {"class": "lst-lnk-notice"}).get('href')
         #description = link.find("div", {"class": "solcc"})
         print "title, ---> ", title
-        selenium.get(page_link)
+        selenium.get("https://www.fbo.gov/" + page_link)
         html_content = selenium.page_source
         print "Found HTML Content from the FBO Detail page"
         soup = BeautifulSoup(html_content, "html5lib")
