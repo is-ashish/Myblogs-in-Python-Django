@@ -75,19 +75,18 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
         print "title, ---> ", title
         selenium.get("https://www.fbo.gov/" + page_link)
         html_content = selenium.page_source
-
         soup = BeautifulSoup(html_content, "html5lib")
         try:
             description = soup.find("div", {"id": "dnf_class_values_procurement_notice__description__widget"}).text
         except:
-            print "Could not Found description from the FBO Detail page+ ", html_content
+            print "Could not Found description from the FBO Detail page+ "
             continue
         if not validate_keyword_with_description(keyword_to_be_matched, description, title):
             print "keyword didn't match so skipping the result"
             continue
 
         date = row.find("td", {"headers": "lh_current_posted_date"}).text
-        print user_request.id, " ---> ", title, date
+        # print user_request.id, " ---> ", title, date
 
         opportunity = Opportunity.objects.get_or_create(url=url, title=title)[0]
         opportunity.posted_on = date
@@ -98,7 +97,7 @@ def update_opportunities_for_user_request(user_request, rows, keyword_to_be_matc
             KeywordOpportunity.objects.get_or_create(opportunity=opportunity, keyword=keyword)
         for code in user_request.codes.all():
             CodeOpportunity.objects.get_or_create(opportunity=opportunity, code=code)
-    print "total updated opportunities %s" %updated_count
+    print "total updated opportunities %s" % updated_count
 
 
 @transaction.atomic
@@ -630,7 +629,7 @@ def scrape_user_request_opportunities_in_selenium(user_request):
             ).click()
     submit.click()
     html_content = selenium.page_source
-    print "Found HTML Content from the FBO page"
+    # print "Found HTML Content from the FBO page"
     soup = BeautifulSoup(html_content, "html5lib")
     rows = soup.findAll("tr")
     final_rows = []
