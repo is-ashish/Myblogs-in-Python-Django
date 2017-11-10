@@ -618,10 +618,9 @@ def scrape_user_request_opportunities_in_selenium(user_request):
         keyword_to_be_matched = keywords[0].name
         keyword_list = [keyword_to_be_matched]
         if keyword_to_be_matched is not None:
-            result = re.match('\"([\w\s,]*)\"', keyword_to_be_matched)
-            print result
-            if result:
-                keyword_list = result.groups()[1:]
+            result = re.findall('\"([\w\s,]*)\"', keyword_to_be_matched)
+            if len(result) > 0:
+                keyword_list = result
             print "keywords->", keyword_list
         keyword_input.send_keys(" ".join(keyword_list))
     if len(codes) > 0:
